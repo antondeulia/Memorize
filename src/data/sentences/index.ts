@@ -1,0 +1,17 @@
+export const sentences = [
+  "The quick brown fox jumps over the lazy dog.",
+  "A journey of a thousand miles begins with a single step.",
+  "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.",
+  "The only limit to our realization of tomorrow will be our doubts of today.",
+  "In the end, we will remember not the words of our enemies, but the silence of our friends.",
+  "Success is not final, failure is not fatal: It is the courage to continue that counts.",
+  "Life is what happens when you're busy making other plans.",
+  "You only live once, but if you do it right, once is enough.",
+  "The greatest glory in living lies not in never falling, but in rising every time we fall.",
+  "It does not matter how slowly you go as long as you do not stop.",
+  "Act as if what you do makes a difference. It does.",
+  "Happiness is not something ready-made. It comes from your own actions.",
+  "The future belongs to those who believe in the beauty of their dreams.",
+  "The best way to predict your future is to create it.",
+  "Believe you can and you're halfway there.",
+];
