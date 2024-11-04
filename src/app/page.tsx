@@ -13,10 +13,13 @@ const HomePage = () => {
               <Link href="/sequential">Sequential Mode</Link>
             </li>
             <li className="text-blue-500 hover:underline pt-2 px-4">
-              <Link href="/dialogs">Dialog Mode</Link>
+              <Link href="/dialog">Dialog Mode</Link>
             </li>
             <li className="text-blue-500 hover:underline pt-2 px-4">
-              <Link href="/senctences">Sentences Mode</Link>
+              <Link href="/sentences">Sentences Mode</Link>
+            </li>
+            <li className="text-blue-500 hover:underline pt-2 px-4">
+              <Link href="/practice">Practice Mode</Link>
             </li>
           </ul>
         </div>

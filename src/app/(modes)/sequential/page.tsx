@@ -6,7 +6,7 @@ const SequentialTranslationsPage = () => {
       <div className="container">
         <h2>Sequential translations page</h2>
         <ul>
-          <li className="bg-white">
+          <li>
             <Link href="/sequential/2">#1</Link>
           </li>
         </ul>
