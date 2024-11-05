@@ -1,8 +1,9 @@
 "use client";
 
+import { sentences } from "@/words";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 
 type Step = {
   translate: string;
@@ -10,19 +11,23 @@ type Step = {
 
 const steps: Step[] = [
   {
-    translate: "Hello",
-  },
-  {
-    translate: "Coffe",
-  },
-  {
-    translate: "Please",
+    translate: "Hello, how much does this cost?",
   },
 ];
 
+const generateRandomSentence = (wordCount: number) => {
+  let sentence = "";
+  for (let i = 0; i < wordCount; i++) {
+    const randomIndex = Math.floor(Math.random() * sentences.length);
+    sentence += (i === 0 ? "" : " ") + sentences[randomIndex];
+  }
+
+  return sentence.charAt(0).toUpperCase() + sentence.slice(1) + ".";
+};
+
 const PracticePage = () => {
-  const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const continueRef = useRef<HTMLButtonElement | null>(null);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [userText, setUserText] = useState("");
@@ -30,37 +35,22 @@ const PracticePage = () => {
   const [isWrong, setIsWrong] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
 
-  const handleCheck = (stepTranslate: string) => {
+  const handleCheck = (text: string) => {
     if (currentStep + 1 <= steps.length) {
-      console.log(stepTranslate);
-      console.log(userText);
+      continueRef.current?.focus();
 
-      switch (stepTranslate) {
-        case "Hello":
-          if (userText !== "Привет") {
-            setIsWrong(true);
-          } else {
-            setIsCorrect(true);
-          }
-          break;
-        case "Coffe":
-          if (userText !== "кофе") {
-            console.log("here?");
-            setIsWrong(true);
-          } else {
-            console.log("or here?");
-            setIsCorrect(true);
-          }
-          break;
-        case "Please":
-          if (userText !== "пожалуйста") {
-            console.log("here?");
-            setIsWrong(true);
-          } else {
-            console.log("or here?");
-            setIsCorrect(true);
-          }
-          break;
+      steps.push({
+        translate: generateRandomSentence(1),
+      });
+
+      // TODO: send prompt to AI:
+      // Is this a correct translation? original text: ${text}; user text: ${userText}. Return true if yes, no (and reasons) if no;
+      // if (res.message.startsWith)... (Depends on response)
+
+      if (text === userText) {
+        setIsCorrect(true);
+      } else {
+        setIsWrong(true);
       }
     } else {
     }
@@ -73,9 +63,7 @@ const PracticePage = () => {
     setIsCorrect(false);
 
     setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-      }
+      textareaRef?.current?.focus();
     }, 0);
   };
 
@@ -92,7 +80,7 @@ const PracticePage = () => {
               return (
                 <>
                   <div className="w-[75%] mx-auto mt-[85px]" key={index}>
-                    <p className="bg-white text-black p-3 px-8 rounded-2xl border-2 border-gray-400 w-max text-md cursor-default">
+                    <p className="bg-white text-black p-3 px-8 rounded-2xl border-2 border-gray-400 w-max text-[18px] cursor-default">
                       {step.translate}
                     </p>
                     <textarea
@@ -145,11 +133,12 @@ const PracticePage = () => {
               />
               <div className="flex flex-col">
                 <h2 className="text-[24px] font-bold">Correct solution:</h2>
-                <p className="text-[18px]">Привет</p>
+                <p className="text-[18px]">{"$text"}</p>
               </div>
             </div>
 
             <button
+              ref={continueRef}
               onClick={handleContinue}
               className="uppercase p-4 text-white bg-[#EA2B2B] hover:bg-red duration-300 transition-all w-[150px] rounded-md shadow-xl"
             >
@@ -166,6 +155,7 @@ const PracticePage = () => {
             </div>
 
             <button
+              ref={continueRef}
               onClick={handleContinue}
               className="uppercase p-4 text-white bg-[#58CC02] hover:bg-[#61E002] duration-300 transition-all w-[150px] rounded-md shadow-xl"
             >
