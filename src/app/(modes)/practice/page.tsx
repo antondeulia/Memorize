@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
+import { Howl } from "howler";
 
 type Step = {
   text: string;
@@ -50,6 +51,17 @@ const PracticePage = () => {
     maxLength: 10,
   });
 
+  // Statistics
+  const [stats, setStats] = useState<{
+    total: number;
+    correct: number;
+    wrong: number;
+  }>({
+    total: 0,
+    correct: 0,
+    wrong: 0,
+  });
+
   const handleConfigChange = (
     e: ChangeEvent<HTMLSelectElement> | ChangeEvent<HTMLInputElement>
   ) => {
@@ -80,15 +92,31 @@ const PracticePage = () => {
 
     const data: { content: string } = await res.json();
 
-    if (data.content.startsWith("true")) {
+    if (data.content.toLowerCase().startsWith("true")) {
+      successSound.play();
+
       setIsCorrect(true);
-      setIsWrong(false);
+
+      setStats((prev) => ({
+        ...prev,
+        total: ++prev.total,
+        correct: ++prev.correct,
+      }));
+
       setTimeout(() => {
         continueRef.current?.focus();
       }, 10);
     } else {
+      falseSound.play();
+
       setIsWrong(true);
-      setIsCorrect(false);
+
+      setStats((prev) => ({
+        ...prev,
+        total: prev.total + 1,
+        wrong: prev.wrong + 1,
+      }));
+
       setTimeout(() => {
         continueRef.current?.focus();
       }, 10);
@@ -141,6 +169,16 @@ const PracticePage = () => {
     setIsCorrect(false);
   };
 
+  const successSound = new Howl({
+    src: "/success.mp3",
+    volume: 0.5,
+  });
+
+  const falseSound = new Howl({
+    src: "/error.mp3",
+    volume: 0.5,
+  });
+
   return (
     <>
       <div className="container flex justify-center items-center h-screen">
@@ -157,8 +195,8 @@ const PracticePage = () => {
           @
         </div>
         <div className="h-[90%] w-[90%]">
-          {!showConfig && (
-            <div className="absolute py-4 px-4 bg-[#58CC02] shadow-xl mt-1 flex flex-wrap gap-10 ">
+          {!showConfig ? (
+            <div className="py-4 px-4 bg-[#636363] shadow-xl mt-1 flex flex-wrap gap-10">
               <select
                 name="level"
                 id="level"
@@ -232,13 +270,17 @@ const PracticePage = () => {
                 <option value="German">Deutschland</option>
               </select>
             </div>
+          ) : (
+            <div className="text-2xl text-center">
+              {stats.total}: {stats.wrong} | {stats.correct}
+            </div>
           )}
 
           {steps.map((step, index) => {
             if (currentStep === index) {
               return (
                 <>
-                  <div className="w-[75%] mx-auto mt-[150px]" key={index}>
+                  <div className="w-[75%] mx-auto mt-[100px]" key={index}>
                     <div className="relative">
                       {isTranslationShown && (
                         <p className="absolute bg-gray-200 border-1 border-black top-[60px] left-4 rounded-md py-2 px-4">
@@ -275,6 +317,7 @@ const PracticePage = () => {
                         SKIP
                       </button>
                       <button
+                        disabled={isChecking}
                         onClick={() => handleCheck(step.translation)}
                         className="text-white p-4 duration-300 transition-all w-[150px] rounded-md shadow-lg active:scale-95 active:shadow-sm outline-none uppercase"
                         style={{
@@ -333,6 +376,7 @@ const PracticePage = () => {
 
             <button
               ref={continueRef}
+              disabled={isContinueLoading}
               onClick={handleContinue}
               className="outline-none uppercase p-4 text-white bg-[#EA2B2B] hover:bg-red duration-300 transition-all w-[150px] rounded-md shadow-xl active:scale-95"
             >
@@ -349,6 +393,7 @@ const PracticePage = () => {
             </div>
 
             <button
+              disabled={isContinueLoading}
               ref={continueRef}
               onClick={handleContinue}
               className="outline-none uppercase p-4 text-white bg-[#58CC02] hover:bg-[#61E002] duration-300 transition-all w-[150px] rounded-md shadow-xl active:scale-95"
