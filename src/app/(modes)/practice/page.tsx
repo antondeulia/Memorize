@@ -170,6 +170,8 @@ const PracticePage = () => {
                 <option value="A2">A2</option>
                 <option value="B1">B1</option>
                 <option value="B2">B2</option>
+                <option value="С1">С1</option>
+                <option value="С2">С2</option>
               </select>
 
               <div className="flex gap-3">
