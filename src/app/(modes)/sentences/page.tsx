@@ -30,7 +30,6 @@ const SentencesPage = () => {
     if (currentStep + 1 < steps.length) {
       setCurrentStep((prev) => ++prev);
     } else {
-      console.log("hello");
       router.push("/");
     }
   };
