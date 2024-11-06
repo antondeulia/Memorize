@@ -1,18 +1,11 @@
 "use client";
 
-import { generateRandomSentence } from "@/utils";
 import Image from "next/image";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
 type Step = {
   translate: string;
 };
-
-const steps: Step[] = [
-  {
-    translate: "First step",
-  },
-];
 
 const PracticePage = () => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -21,6 +14,15 @@ const PracticePage = () => {
   // Main
   const [currentStep, setCurrentStep] = useState(0);
   const [userText, setUserText] = useState("");
+  const [steps, setSteps] = useState<Step[]>([
+    {
+      translate: "First step",
+    },
+  ]);
+
+  // Loadings
+  const [isChecking, setIsChecking] = useState(false);
+  const [isContinueLoading, setIsContinueLoading] = useState(false);
 
   // State after checking
   const [isWrong, setIsWrong] = useState(false);
@@ -34,12 +36,45 @@ const PracticePage = () => {
     minLength: number;
     maxLength: number;
   }>({
-    level: null,
-    topic: null,
-    tense: null,
+    level: "A1",
+    topic: "Food",
+    tense: "Current",
     minLength: 3,
     maxLength: 10,
   });
+
+  useEffect(() => {
+    const fetchSentences = async () => {
+      const body = {
+        levels: [config.level],
+        topics: [config.topic],
+        tenses: [config.tense],
+        minLength: config.minLength,
+        maxLength: config.maxLength,
+      };
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/practice`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        }
+      );
+
+      const data = await res.json();
+
+      setSteps(
+        data.content.map((content: string) => ({
+          translate: content.replace(/^"|"$/g, ""),
+        }))
+      );
+    };
+
+    fetchSentences();
+  }, [config]);
 
   const handleConfigChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -51,66 +86,76 @@ const PracticePage = () => {
   };
 
   const handleCheck = async (text: string) => {
-    continueRef.current?.focus();
+    setIsChecking(true);
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/practice`, {
-      method: "POST",
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/practice/check`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text,
+          userText,
+        }),
+      }
+    );
 
-    const data = await res.json();
+    const data: { content: string } = await res.json();
 
-    steps.push({
-      translate: data.content,
-    });
-
-    // Текст для перевода: ${text};
-    // Перевод пользователя: ${userText};
-
-    const message = `
-      Проверь текст на правильность значения, правильность граматики, но при этом допустимо использовать синонимы и мелкие опечатки.
-      
-      Текст для перевода: Hello, would you like to order coffe or tee?;
-      Перевод пользователя: Привет, вы бы хотели заказать коффе или чай?;
-      
-      Если перевод правильный, верни одобрение и рекомендации.
-      Если перевод неверный, верни отказ и опиши в чем причина.
-    `;
-
-    // const res = await fetch("http://localhost:4200", {
-    //   method: "POST",
-    // });
-
-    // TODO: send prompt to AI:
-    // Is this a correct translation? original text: ${text}; user text: ${userText}. Return true if yes, no (and reasons) if no;
-    // if (res.message.startsWith)... (Depends on response)
-
-    if (text === userText) {
+    if (data.content.startsWith("true")) {
       setIsCorrect(true);
+      setIsWrong(false);
+      setTimeout(() => {
+        continueRef.current?.focus();
+      }, 10);
     } else {
       setIsWrong(true);
+      setIsCorrect(false);
+      setTimeout(() => {
+        continueRef.current?.focus();
+      }, 10);
     }
+
+    setIsChecking(false);
   };
 
-  useEffect(() => {}, []);
-
   const handleContinue = async () => {
+    setIsContinueLoading(true);
+
+    const body = {
+      levels: [config.level],
+      topics: [config.topic],
+      tenses: [config.tense],
+      minLength: config.minLength,
+      maxLength: config.maxLength,
+    };
+
     const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/practice`, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
     });
 
     const data = await res.json();
 
     steps.push({
-      translate: data.content,
+      translate: data.content.replace(/^"|"$/g, ""),
     });
 
+    reset();
+
+    setIsContinueLoading(false);
+  };
+
+  const reset = () => {
     setUserText("");
     setCurrentStep((prev) => ++prev);
     setIsWrong(false);
     setIsCorrect(false);
-
-    console.log(data);
-
     setTimeout(() => {
       textareaRef?.current?.focus();
     }, 0);
@@ -190,17 +235,41 @@ const PracticePage = () => {
                   </div>
                   {!isWrong && !isCorrect && (
                     <div className="flex justify-between mt-[75px]">
-                      <button className="p-4 bg-gray-400 w-[150px] rounded-md shadow-xl">
+                      <button className="p-4 bg-gray-400 w-[150px] rounded-md shadow-xl active:scale-95">
                         SKIP
                       </button>
                       <button
                         onClick={() => handleCheck(step.translate)}
-                        className="p-4 bg-[] hover:bg-[#61E002] duration-300 transition-all w-[150px] rounded-md shadow-xl"
+                        className="p-4 duration-300 transition-all w-[150px] rounded-md shadow-lg active:scale-95 active:shadow-sm outline-none uppercase"
                         style={{
-                          background: userText ? "#58CC02" : "gray",
+                          background: "#58CC02",
+                          boxShadow: "0px 6px 0px #3b8801",
+                          transform: "translateY(-2px)",
+                        }}
+                        onMouseDown={(e) =>
+                          (e.currentTarget.style.transform = "translateY(2px)")
+                        }
+                        onMouseUp={(e) =>
+                          (e.currentTarget.style.transform = "translateY(-2px)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.transform = "translateY(-2px)")
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            e.currentTarget.style.transform = "translateY(2px)";
+                          }
+                        }}
+                        onKeyUp={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.currentTarget.style.transform =
+                              "translateY(-2px)";
+                            handleCheck(step.translate);
+                          }
                         }}
                       >
-                        CHECK
+                        {isChecking ? "checking..." : "check"}
                       </button>
                     </div>
                   )}
@@ -231,7 +300,7 @@ const PracticePage = () => {
               onClick={handleContinue}
               className="outline-none uppercase p-4 text-white bg-[#EA2B2B] hover:bg-red duration-300 transition-all w-[150px] rounded-md shadow-xl active:scale-95"
             >
-              Continue:
+              {isContinueLoading ? "Loading..." : "Continue"}
             </button>
           </div>
         </div>
@@ -248,7 +317,7 @@ const PracticePage = () => {
               onClick={handleContinue}
               className="outline-none uppercase p-4 text-white bg-[#58CC02] hover:bg-[#61E002] duration-300 transition-all w-[150px] rounded-md shadow-xl active:scale-95"
             >
-              Continue
+              {isContinueLoading ? "Loading..." : "Continue"}
             </button>
           </div>
         </div>
