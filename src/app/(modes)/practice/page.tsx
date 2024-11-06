@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
 type Step = {
@@ -16,7 +17,7 @@ const PracticePage = () => {
   const [userText, setUserText] = useState("");
   const [steps, setSteps] = useState<Step[]>([
     {
-      translate: "First step",
+      translate: "Let's start!",
     },
   ]);
 
@@ -36,12 +37,23 @@ const PracticePage = () => {
     minLength: number;
     maxLength: number;
   }>({
-    level: "A1",
-    topic: "Food",
-    tense: "Current",
+    level: "",
+    topic: "",
+    tense: "",
     minLength: 3,
     maxLength: 10,
   });
+
+  const handleConfigChange = (
+    e: ChangeEvent<HTMLSelectElement> | ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value } = e.target;
+
+    setConfig((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   useEffect(() => {
     const fetchSentences = async () => {
@@ -75,15 +87,6 @@ const PracticePage = () => {
 
     fetchSentences();
   }, [config]);
-
-  const handleConfigChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-
-    setConfig((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
 
   const handleCheck = async (text: string) => {
     setIsChecking(true);
@@ -128,8 +131,8 @@ const PracticePage = () => {
       levels: [config.level],
       topics: [config.topic],
       tenses: [config.tense],
-      minLength: config.minLength,
-      maxLength: config.maxLength,
+      minLength: Number(config.minLength),
+      maxLength: Number(config.maxLength),
     };
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/practice`, {
@@ -148,6 +151,9 @@ const PracticePage = () => {
 
     reset();
 
+    setTimeout(() => {
+      textareaRef?.current?.focus();
+    }, 10);
     setIsContinueLoading(false);
   };
 
@@ -156,14 +162,17 @@ const PracticePage = () => {
     setCurrentStep((prev) => ++prev);
     setIsWrong(false);
     setIsCorrect(false);
-    setTimeout(() => {
-      textareaRef?.current?.focus();
-    }, 0);
   };
 
   return (
     <>
       <div className="container flex justify-center items-center h-screen">
+        <Link
+          href="/"
+          className="absolute top-10 left-[250px] text-2xl bg-gray-700 px-4 cursor-pointer "
+        >
+          x
+        </Link>
         <div className="h-[90%] w-[90%]">
           <div className="mt-10 flex gap-10 text-black">
             <select
@@ -173,6 +182,7 @@ const PracticePage = () => {
               onChange={handleConfigChange}
               value={config.level ? config.level : "none"}
             >
+              <option value="Any">Any</option>
               <option value="A1">A1</option>
               <option value="A2">A2</option>
               <option value="B1">B1</option>
@@ -180,8 +190,22 @@ const PracticePage = () => {
             </select>
 
             <div className="flex gap-3">
-              <input className="w-[50px]" type="text" placeholder="min" />
-              <input className="w-[50px]" type="text" placeholder="max" />
+              <input
+                className="w-[50px]"
+                type="text"
+                placeholder="min"
+                name="minLength"
+                onChange={handleConfigChange}
+                value={config.minLength}
+              />
+              <input
+                className="w-[50px]"
+                type="text"
+                placeholder="max"
+                name="maxLength"
+                onChange={handleConfigChange}
+                value={config.maxLength}
+              />
             </div>
 
             <select
@@ -190,10 +214,11 @@ const PracticePage = () => {
               onChange={handleConfigChange}
               value={config.topic ? config.topic : "none"}
             >
-              <option value="A1">School</option>
-              <option value="A2">Family</option>
-              <option value="B1">Relationships</option>
-              <option value="B2">Work</option>
+              <option value="Any">Any</option>
+              <option value="School">School</option>
+              <option value="Family">Family</option>
+              <option value="Relationships">Relationships</option>
+              <option value="Work">Work</option>
             </select>
 
             <select
@@ -202,10 +227,11 @@ const PracticePage = () => {
               onChange={handleConfigChange}
               value={config.tense ? config.tense : "none"}
             >
-              <option value="A1">Past Simple</option>
-              <option value="A2">Past Feature</option>
-              <option value="B1">Past Continius</option>
-              <option value="B2">Feature</option>
+              <option value="Any">Any</option>
+              <option value="Past Simple">Past Simple</option>
+              <option value="Past feature">Past Feature</option>
+              <option value="Past continius">Past Continius</option>
+              <option value="Feature">Feature</option>
             </select>
           </div>
 

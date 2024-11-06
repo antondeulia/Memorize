@@ -38,7 +38,7 @@ const SequentialTranslationPage = () => {
         <div className="mt-8 flex flex-col gap-10">
           <p className="text-2xl border-[4px] border-white p-4">
             {sentences.map((sentence, index) => {
-              const displayText = translations[index] || sentence; // Use translation if available
+              const displayText = translations[index] || sentence;
               return (
                 <span
                   key={index}
