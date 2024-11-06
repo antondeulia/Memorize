@@ -23,6 +23,7 @@ const PracticePage = () => {
     },
   ]);
   const [isTranslationShown, setIsTranslationShown] = useState(false);
+  const [showConfig, setShowConfig] = useState(false);
 
   // Loadings
   const [isChecking, setIsChecking] = useState(false);
@@ -59,40 +60,6 @@ const PracticePage = () => {
       [name]: value,
     }));
   };
-
-  useEffect(() => {
-    const fetchSentences = async () => {
-      const body = {
-        lang: [config.lang],
-        levels: [config.level],
-        topics: [config.topic],
-        tenses: [config.tense],
-        minLength: config.minLength,
-        maxLength: config.maxLength,
-      };
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/practice`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(body),
-        }
-      );
-
-      const data = await res.json();
-
-      setSteps(
-        data.content.map((content: string) => ({
-          translate: content.replace(/^"|"$/g, ""),
-        }))
-      );
-    };
-
-    fetchSentences();
-  }, [config]);
 
   const handleCheck = async (text: string) => {
     setIsChecking(true);
@@ -179,91 +146,114 @@ const PracticePage = () => {
       <div className="container flex justify-center items-center h-screen">
         <Link
           href="/"
-          className="absolute top-10 left-[250px] text-2xl bg-gray-700 px-4 cursor-pointer "
+          className="absolute top-10 left-[250px] text-2xl text-[38px] text-gray-400 px-4 cursor-pointer "
         >
-          x
+          {"<-"}
         </Link>
+        <div
+          onClick={() => setShowConfig((prev) => !prev)}
+          className="absolute top-10 right-[250px] text-2xl text-[38px] text-gray-400 px-4 cursor-pointer "
+        >
+          @
+        </div>
         <div className="h-[90%] w-[90%]">
-          <div className="mt-10 flex gap-10 text-black">
-            <select
-              name="level"
-              id="level"
-              className="w-[75px]"
-              onChange={handleConfigChange}
-            >
-              <option value="Any">Any</option>
-              <option value="A1">A1</option>
-              <option value="A2">A2</option>
-              <option value="B1">B1</option>
-              <option value="B2">B2</option>
-            </select>
+          {!showConfig && (
+            <div className="absolute py-4 px-4 bg-[#58CC02] shadow-xl mt-1 flex flex-wrap gap-10 ">
+              <select
+                name="level"
+                id="level"
+                className="border border-black py-1 px-4"
+                onChange={handleConfigChange}
+              >
+                <option value="Any">Any</option>
+                <option value="A1">A1</option>
+                <option value="A2">A2</option>
+                <option value="B1">B1</option>
+                <option value="B2">B2</option>
+              </select>
 
-            <div className="flex gap-3">
-              <input
-                className="w-[50px]"
-                type="text"
-                placeholder="min"
-                name="minLength"
+              <div className="flex gap-3">
+                <input
+                  className="w-[50px] border border-black px-4"
+                  type="text"
+                  placeholder="min"
+                  name="minLength"
+                  onChange={handleConfigChange}
+                  value={config.minLength}
+                />
+                <input
+                  className="w-[50px] border border-black px-4"
+                  type="text"
+                  placeholder="max"
+                  name="maxLength"
+                  onChange={handleConfigChange}
+                  value={config.maxLength}
+                />
+              </div>
+
+              <select
+                name="topic"
+                id="topic"
                 onChange={handleConfigChange}
-                value={config.minLength}
-              />
-              <input
-                className="w-[50px]"
-                type="text"
-                placeholder="max"
-                name="maxLength"
+                className="border border-black px-4"
+              >
+                <option value="Any">Any</option>
+                <option value="School">School</option>
+                <option value="Family">Family</option>
+                <option value="Relationships">Relationships</option>
+                <option value="Work">Work</option>
+              </select>
+
+              <select
+                name="tense"
+                id="tense"
                 onChange={handleConfigChange}
-                value={config.maxLength}
-              />
+                className="border border-black px-4"
+              >
+                <option value="Any">Any</option>
+                <option value="Past Simple">Past Simple</option>
+                <option value="Past feature">Past Feature</option>
+                <option value="Past continius">Past Continius</option>
+                <option value="Feature">Feature</option>
+              </select>
+
+              <select
+                name="lang"
+                id="lang"
+                onChange={handleConfigChange}
+                className='border border-black px-4"'
+              >
+                <option value="English">English</option>
+                <option value="Sweden">Svergies</option>
+                <option value="Russian">Русский</option>
+                <option value="Ukrainian">Українська</option>
+                <option value="German">Deutschland</option>
+              </select>
             </div>
-
-            <select name="topic" id="topic" onChange={handleConfigChange}>
-              <option value="Any">Any</option>
-              <option value="School">School</option>
-              <option value="Family">Family</option>
-              <option value="Relationships">Relationships</option>
-              <option value="Work">Work</option>
-            </select>
-
-            <select name="tense" id="tense" onChange={handleConfigChange}>
-              <option value="Any">Any</option>
-              <option value="Past Simple">Past Simple</option>
-              <option value="Past feature">Past Feature</option>
-              <option value="Past continius">Past Continius</option>
-              <option value="Feature">Feature</option>
-            </select>
-
-            <select name="lang" id="lang" onChange={handleConfigChange}>
-              <option value="English">English</option>
-              <option value="Sweden">Svergies</option>
-              <option value="Russian">Русский</option>
-              <option value="Ukrainian">Українська</option>
-              <option value="German">Deutschland</option>
-            </select>
-          </div>
+          )}
 
           {steps.map((step, index) => {
             if (currentStep === index) {
               return (
                 <>
-                  <div className="w-[75%] mx-auto mt-[85px]" key={index}>
+                  <div className="w-[75%] mx-auto mt-[150px]" key={index}>
                     <div className="relative">
                       {isTranslationShown && (
-                        <p className="absolute bg-gray-200 text-black border-1 border-black top-[60px] left-4 rounded-md py-2 px-4">
+                        <p className="absolute bg-gray-200 border-1 border-black top-[60px] left-4 rounded-md py-2 px-4">
                           {step.translation}
                         </p>
                       )}
                       <p
                         onMouseMove={() => setIsTranslationShown(true)}
                         onMouseLeave={() => setIsTranslationShown(false)}
-                        className="overflow-y-auto max-w-full max-h-[150px] bg-white text-black p-3 px-8 rounded-2xl border-2 border-gray-400 w-max text-[18px] cursor-default"
+                        className="overflow-y-auto max-w-full max-h-[150px] bg-white p-3 px-8 rounded-2xl border-2 border-gray-400 w-max text-[18px] cursor-default"
                       >
                         {step.text}
                       </p>
                     </div>
                     <textarea
                       ref={textareaRef}
-                      className="resize-none block mt-[60px] w-[100%] h-[180px] rounded-xl p-4 text-black text-[18px] bg-gray-200 outline-none border-1 border-gray-500 shadow-xl"
+                      className="resize-none block mt-[60px] w-[100%] h-[180px] rounded-xl p-4 text-[18px] bg-gray-200 outline-none border-1 border-gray-500 shadow-xl"
                       placeholder="Type in German"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
@@ -279,12 +269,12 @@ const PracticePage = () => {
                   </div>
                   {!isWrong && !isCorrect && (
                     <div className="flex justify-between mt-[75px]">
-                      <button className="p-4 bg-gray-400 w-[150px] rounded-md shadow-xl active:scale-95">
+                      <button className="p-4 bg-gray-400 text-white w-[150px] rounded-md shadow-xl active:scale-95">
                         SKIP
                       </button>
                       <button
                         onClick={() => handleCheck(step.translation)}
-                        className="p-4 duration-300 transition-all w-[150px] rounded-md shadow-lg active:scale-95 active:shadow-sm outline-none uppercase"
+                        className="text-white p-4 duration-300 transition-all w-[150px] rounded-md shadow-lg active:scale-95 active:shadow-sm outline-none uppercase"
                         style={{
                           background: userText ? "#58CC02" : "gray",
                           boxShadow: userText && "0px 6px 0px #3b8801",
