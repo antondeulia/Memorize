@@ -31,12 +31,14 @@ const PracticePage = () => {
 
   // Configurations
   const [config, setConfig] = useState<{
+    lang: string;
     level: string | null;
     topic: string | null;
     tense: string | null;
     minLength: number;
     maxLength: number;
   }>({
+    lang: "English",
     level: "",
     topic: "",
     tense: "",
@@ -58,6 +60,7 @@ const PracticePage = () => {
   useEffect(() => {
     const fetchSentences = async () => {
       const body = {
+        lang: [config.lang],
         levels: [config.level],
         topics: [config.topic],
         tenses: [config.tense],
@@ -128,6 +131,7 @@ const PracticePage = () => {
     setIsContinueLoading(true);
 
     const body = {
+      lang: config.lang,
       levels: [config.level],
       topics: [config.topic],
       tenses: [config.tense],
@@ -180,7 +184,6 @@ const PracticePage = () => {
               id="level"
               className="w-[75px]"
               onChange={handleConfigChange}
-              value={config.level ? config.level : "none"}
             >
               <option value="Any">Any</option>
               <option value="A1">A1</option>
@@ -208,12 +211,7 @@ const PracticePage = () => {
               />
             </div>
 
-            <select
-              name="topic"
-              id="topic"
-              onChange={handleConfigChange}
-              value={config.topic ? config.topic : "none"}
-            >
+            <select name="topic" id="topic" onChange={handleConfigChange}>
               <option value="Any">Any</option>
               <option value="School">School</option>
               <option value="Family">Family</option>
@@ -221,17 +219,20 @@ const PracticePage = () => {
               <option value="Work">Work</option>
             </select>
 
-            <select
-              name="tense"
-              id="tense"
-              onChange={handleConfigChange}
-              value={config.tense ? config.tense : "none"}
-            >
+            <select name="tense" id="tense" onChange={handleConfigChange}>
               <option value="Any">Any</option>
               <option value="Past Simple">Past Simple</option>
               <option value="Past feature">Past Feature</option>
               <option value="Past continius">Past Continius</option>
               <option value="Feature">Feature</option>
+            </select>
+
+            <select name="lang" id="lang" onChange={handleConfigChange}>
+              <option value="English">English</option>
+              <option value="Sweden">Svergies</option>
+              <option value="Russian">Русский</option>
+              <option value="Ukrainian">Українська</option>
+              <option value="German">Deutschland</option>
             </select>
           </div>
 
