@@ -5,7 +5,8 @@ import Link from "next/link";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
 type Step = {
-  translate: string;
+  text: string;
+  translation: string;
 };
 
 const PracticePage = () => {
@@ -17,9 +18,11 @@ const PracticePage = () => {
   const [userText, setUserText] = useState("");
   const [steps, setSteps] = useState<Step[]>([
     {
-      translate: "Let's start!",
+      text: "Let's start!",
+      translation: "Давай начнём!",
     },
   ]);
+  const [isTranslationShown, setIsTranslationShown] = useState(false);
 
   // Loadings
   const [isChecking, setIsChecking] = useState(false);
@@ -149,8 +152,11 @@ const PracticePage = () => {
 
     const data = await res.json();
 
+    const content = data.content.split(" | ");
+
     steps.push({
-      translate: data.content.replace(/^"|"$/g, ""),
+      text: content[0],
+      translation: content[1],
     });
 
     reset();
@@ -241,9 +247,20 @@ const PracticePage = () => {
               return (
                 <>
                   <div className="w-[75%] mx-auto mt-[85px]" key={index}>
-                    <p className="overflow-y-auto max-w-full max-h-[150px] bg-white text-black p-3 px-8 rounded-2xl border-2 border-gray-400 w-max text-[18px] cursor-default">
-                      {step.translate}
-                    </p>
+                    <div className="relative">
+                      {isTranslationShown && (
+                        <p className="absolute bg-gray-200 text-black border-1 border-black top-[60px] left-4 rounded-md py-2 px-4">
+                          {step.translation}
+                        </p>
+                      )}
+                      <p
+                        onMouseMove={() => setIsTranslationShown(true)}
+                        onMouseLeave={() => setIsTranslationShown(false)}
+                        className="overflow-y-auto max-w-full max-h-[150px] bg-white text-black p-3 px-8 rounded-2xl border-2 border-gray-400 w-max text-[18px] cursor-default"
+                      >
+                        {step.text}
+                      </p>
+                    </div>
                     <textarea
                       ref={textareaRef}
                       className="resize-none block mt-[60px] w-[100%] h-[180px] rounded-xl p-4 text-black text-[18px] bg-gray-200 outline-none border-1 border-gray-500 shadow-xl"
@@ -251,7 +268,7 @@ const PracticePage = () => {
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
-                          handleCheck(step.translate);
+                          handleCheck(step.text);
                         }
                       }}
                       onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
@@ -266,11 +283,11 @@ const PracticePage = () => {
                         SKIP
                       </button>
                       <button
-                        onClick={() => handleCheck(step.translate)}
+                        onClick={() => handleCheck(step.translation)}
                         className="p-4 duration-300 transition-all w-[150px] rounded-md shadow-lg active:scale-95 active:shadow-sm outline-none uppercase"
                         style={{
-                          background: "#58CC02",
-                          boxShadow: "0px 6px 0px #3b8801",
+                          background: userText ? "#58CC02" : "gray",
+                          boxShadow: userText && "0px 6px 0px #3b8801",
                           transform: "translateY(-2px)",
                         }}
                         onMouseDown={(e) =>
@@ -292,7 +309,7 @@ const PracticePage = () => {
                           if (e.key === "Enter" || e.key === " ") {
                             e.currentTarget.style.transform =
                               "translateY(-2px)";
-                            handleCheck(step.translate);
+                            handleCheck(step.translation);
                           }
                         }}
                       >
