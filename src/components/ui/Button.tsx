@@ -1,45 +1,51 @@
 "use client";
 
 import { cn } from "@/utils/cn";
-import { ReactNode, useState, KeyboardEvent } from "react";
 
 type ButtonProps = {
-  handleClick: any;
+  ref?: any;
+  text: string;
+  isLoading?: boolean;
+  style?: any;
   className?: string;
-  children: ReactNode;
+  handleClick: () => void;
+  handleMouseDown?: (e: any) => void;
+  handleMouseUp?: (e: any) => void;
+  handleMouseLeave?: (e: any) => void;
+  handleKeyDown?: (e: any) => void;
+  handleKeyUp?: (e: any) => void;
 };
 
-const Button = ({ handleClick, className = "", children }: ButtonProps) => {
-  const [isPressed, setIsPressed] = useState(false);
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key === "Enter" || e.key === " ") {
-      setIsPressed(true);
-    }
-  };
-
-  const handleKeyUp = (e: KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key === "Enter" || e.key === " ") {
-      setIsPressed(false);
-      handleClick();
-    }
-  };
-
+const Button = ({
+  ref,
+  text,
+  isLoading,
+  style,
+  className,
+  handleClick,
+  handleMouseDown,
+  handleMouseUp,
+  handleMouseLeave,
+  handleKeyDown,
+  handleKeyUp,
+}: ButtonProps) => {
   return (
     <button
-      onClick={handleClick}
+      ref={ref}
+      disabled={isLoading}
       className={cn(
-        "p-4 duration-300 transition-all w-[150px] rounded-md shadow-xl active:scale-95",
-        className,
-        isPressed ? "scale-95" : ""
+        "py-[12px] duration-300 transition-all w-[175px] rounded-[25px] text-[16px] text-white active:scale-95 outline-none uppercase",
+        className || ""
       )}
-      onMouseUp={() => setIsPressed(false)}
-      onMouseDown={() => setIsPressed(true)}
-      onMouseLeave={() => setIsPressed(false)}
+      style={style}
+      onClick={handleClick}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}
     >
-      {children}
+      {isLoading ? "loading..." : text}
     </button>
   );
 };
