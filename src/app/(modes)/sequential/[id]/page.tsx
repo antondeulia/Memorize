@@ -1,3 +1,9 @@
+const SequentialPage = () => {
+  return <div></div>;
+};
+
+export default SequentialPage;
+
 // "use client";
 
 // import { sentences } from "@/data/sentences";
