@@ -34,7 +34,7 @@ const Button = ({
       ref={ref}
       disabled={isLoading}
       className={cn(
-        "py-[12px] duration-300 transition-all w-[175px] rounded-[25px] text-[16px] text-white active:scale-95 outline-none uppercase",
+        "py-4 duration-300 transition-all w-[175px] rounded-[25px] text-[16px] active:scale-95 outline-none uppercase font-bold",
         className || ""
       )}
       style={style}

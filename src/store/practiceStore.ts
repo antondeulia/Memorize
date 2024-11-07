@@ -1,7 +1,11 @@
 "use client";
 
-import { PRACTICE_CHECK_URL } from "@/constants/practiceRoutes";
+import {
+  PRACTICE_CHECK_URL,
+  PRACTICE_POST_URL,
+} from "@/constants/practiceRoutes";
 import { IPracticeStep } from "@/types";
+import { PracticeContentRes } from "@/types/responses";
 import { falseSound, successSound } from "@/utils/sounds";
 import axios from "axios";
 import { create } from "zustand";
@@ -18,7 +22,7 @@ type Config = {
 type PracticeStore = {
   // General
   steps: IPracticeStep[];
-  addStep: (value: IPracticeStep) => void;
+  addStep: () => Promise<void>;
   text: string;
   userText: string;
   setUserText: (value: string) => void;
@@ -31,6 +35,8 @@ type PracticeStore = {
   reset: () => void;
   isChecking: boolean;
   handleCheck: () => void;
+  isContinueLoading: boolean;
+  handleContinue: () => void;
 
   // Config
   config: Config;
@@ -47,10 +53,6 @@ export const usePracticeStore = create<PracticeStore>((set) => ({
       translation: "Давайте начнём",
     },
   ],
-  addStep: (value) =>
-    set((state) => ({
-      steps: [...state.steps, value],
-    })),
   currentStep: 0,
   setCurrentStep: (value) => set({ currentStep: value }),
   text: "",
@@ -74,15 +76,12 @@ export const usePracticeStore = create<PracticeStore>((set) => ({
       isCorrect: false,
       isWrong: false,
     }));
-
     const { steps, userText } = usePracticeStore.getState();
-
     try {
       const { data } = await axios.post(PRACTICE_CHECK_URL, {
-        text: steps[steps.length - 1].text,
+        text: steps[steps.length - 2].text,
         userText,
       });
-
       if (data.content.toLowerCase().startsWith("true")) {
         successSound.play();
         set({ isCorrect: true });
@@ -94,6 +93,40 @@ export const usePracticeStore = create<PracticeStore>((set) => ({
       console.error("Error checking practice:", error);
     } finally {
       set({ isChecking: false });
+    }
+  },
+
+  isContinueLoading: false,
+  addStep: async () => {
+    const { config } = usePracticeStore.getState();
+    try {
+      const { data } = await axios.post<PracticeContentRes>(
+        PRACTICE_POST_URL,
+        config
+      );
+      const content = data.content.split(" | ");
+      set((state) => ({
+        steps: [...state.steps, { text: content[0], translation: content[1] }],
+      }));
+    } catch (error) {
+      console.error("Error fetching practice content:", error);
+    }
+  },
+
+  handleContinue: async () => {
+    set({ isContinueLoading: true });
+    const { setCurrentStep, currentStep, reset, addStep } =
+      usePracticeStore.getState();
+
+    setCurrentStep(currentStep + 1);
+    reset();
+
+    try {
+      await addStep();
+    } catch (error) {
+      console.error("Error in handleContinue:", error);
+    } finally {
+      set({ isContinueLoading: false });
     }
   },
 
