@@ -26,26 +26,7 @@ const PracticeContinue = ({
   bgColor,
   btnStyle,
 }: PracticeContinueProps) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { addStep, setCurrentStep, currentStep, reset, config } =
-    usePracticeStore();
-
-  const handleContinue = async () => {
-    setIsLoading(true);
-
-    const { data } = await axios.post<PracticeContentRes>(
-      PRACTICE_POST_URL,
-      config
-    );
-    const content = data.content.split(" | ");
-
-    addStep({ text: content[0], translation: content[1] });
-    reset();
-
-    setCurrentStep(currentStep + 1);
-    setIsLoading(false);
-  };
-
+  const { handleContinue, isContinueLoading } = usePracticeStore();
   const continueRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -77,9 +58,9 @@ const PracticeContinue = ({
         <Button
           ref={continueRef}
           text="Continue"
-          isLoading={isLoading}
+          isLoading={isContinueLoading}
           handleClick={handleContinue}
-          className="py-4 font-bold"
+          className="py-4 font-bold text-white"
           style={btnStyle}
         />
       </div>

@@ -2,7 +2,7 @@
 
 import { IPracticeStep } from "@/types";
 import PracticeText from "./PracticeText";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useCallback, useEffect, useRef } from "react";
 import PracticeContinue from "./PracticeContinue";
 import { usePracticeStore } from "@/store/practiceStore";
 
@@ -11,14 +11,31 @@ type PracticeStepProps = {
 };
 
 const PracticeStep = ({ step }: PracticeStepProps) => {
-  const { userText, setUserText, isCorrect, isWrong, handleCheck } =
+  const { userText, setUserText, isCorrect, isWrong, handleCheck, addStep } =
     usePracticeStore();
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    textareaRef.current?.focus();
+  }, []);
+
+  const onCheckBegin = useCallback(async () => {
+    if (step.text === "Let's begin") {
+      await addStep();
+    }
+  }, []);
+
+  useEffect(() => {
+    onCheckBegin();
+  }, [onCheckBegin]);
 
   return (
     <li>
       <div className="w-[75%] mx-auto">
         <PracticeText text={step.text} translation={step.translation} />
         <textarea
+          ref={textareaRef}
           className="resize-none block mt-[60px] w-[100%] h-[180px] rounded-xl p-4 text-[18px] bg-[#F7F7F7] outline-none border-2"
           placeholder="Enter a translation in any language"
           onKeyDown={(e) => {

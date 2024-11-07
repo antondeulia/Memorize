@@ -1,6 +1,9 @@
-import { DropdownOption } from "@/components/ui/Dropdown";
+export type PracticeConfigOption = {
+  label: string;
+  value: string;
+};
 
-export const langLevelOptions: DropdownOption[] = [
+export const langLevelOptions: PracticeConfigOption[] = [
   {
     label: "Any",
     value: "any",
@@ -31,7 +34,22 @@ export const langLevelOptions: DropdownOption[] = [
   },
 ];
 
-export const topicOptions: DropdownOption[] = [
+export const lengthOptions: PracticeConfigOption[] = [
+  {
+    label: "Short",
+    value: "short",
+  },
+  {
+    label: "Medium",
+    value: "medium",
+  },
+  {
+    label: "Long",
+    value: "long",
+  },
+];
+
+export const topicOptions: PracticeConfigOption[] = [
   {
     label: "Any",
     value: "any",
@@ -58,7 +76,7 @@ export const topicOptions: DropdownOption[] = [
   },
 ];
 
-export const tenseOptions: DropdownOption[] = [
+export const tenseOptions: PracticeConfigOption[] = [
   { label: "Present Simple", value: "present simple" },
   { label: "Present Continuous (Progressive)", value: "present continuous" },
   { label: "Present Perfect", value: "present perfect" },
@@ -82,7 +100,7 @@ export const tenseOptions: DropdownOption[] = [
   },
 ];
 
-export const langOptions: DropdownOption[] = [
+export const langOptions: PracticeConfigOption[] = [
   { label: "English", value: "english" },
   { label: "Svergies", value: "sweden" },
   { label: "Русский", value: "russian" },

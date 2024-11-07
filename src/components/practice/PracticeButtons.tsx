@@ -17,13 +17,13 @@ const PracticeButtons = () => {
             <Button
               text="skip"
               handleClick={() => console.log("skip")}
-              className="py-[12px] duration-300 transition-all w-[175px] rounded-[25px] text-[16px] text-gray-500 border-2 border-b-[6px] active:scale-95 outline-none uppercase"
+              className="py-4 duration-300 transition-all w-[175px] rounded-[25px] text-[16px] text-gray-400 border-2 border-b-[6px] active:scale-95 outline-none uppercase"
             />
             <Button
               text="check"
               handleClick={handleCheck}
               isLoading={isChecking}
-              className="py-[12px] duration-300 transition-all w-[175px] rounded-[25px] text-[16px] text-white active:scale-95 outline-none uppercase"
+              className="py-4 duration-300 transition-all w-[175px] rounded-[25px] text-[16px] text-white active:scale-95 outline-none uppercase"
               style={{
                 background: userText ? "#58CC02" : "#E5E5E5",
                 boxShadow: userText && "0px 6px 0px #3b8801",
